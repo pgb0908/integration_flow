@@ -65,10 +65,31 @@
 
 ## 아직 하지 않은 작업 / 다음 단계
 
-### 검증 (수동 테스트 필요)
-- [ ] Backend: `mvn spring-boot:run` 후 `curl localhost:8080/api/routes` CRUD 테스트
-- [ ] Data-Plane: `mvn quarkus:dev` 후 `/routes/deploy`, `/health/routes` 엔드포인트 테스트
-- [ ] Frontend: `npm run dev` 후 대시보드, Route 목록, 플로우 디자이너 동작 확인
+### 검증 결과 (2026-02-13 수행)
+
+#### Maven 빌드
+- [x] `shared`: `mvn clean install` — BUILD SUCCESS
+- [x] `control-plane/backend`: `mvn clean install` — BUILD SUCCESS
+- [x] `data-plane`: `mvn clean package` — BUILD SUCCESS
+  - 수정: `CamelContextManager.java`에서 `getRoutesLoader()` → `getCamelContextExtension().getContextPlugin(RoutesLoader.class)` (Camel 4.x API 변경)
+  - 수정: `backend/pom.xml`에 `maven-compiler-plugin` `-parameters` 플래그 추가 (`@PathVariable` 이름 인식용)
+
+#### Backend API 테스트 (curl)
+- [x] `GET /api/routes` (empty) → `[]` 정상
+- [x] `POST /api/routes` (create) → UUID 생성된 route 반환 정상
+- [x] `GET /api/routes/{id}` → 단건 조회 정상
+- [x] `PUT /api/routes/{id}` → name/description/yamlDsl 업데이트 정상
+- [x] `POST /api/routes/{id}/deploy` → Data-Plane 미실행 시 `Connection refused` (예상된 에러)
+- [x] `DELETE /api/routes/{id}` → HTTP 200, 삭제 확인
+- [x] `GET /api/routes` (after delete) → `[]` 정상
+
+#### Frontend 빌드
+- [x] `npx tsc --noEmit` — 에러 없음
+- [x] `npx vite build` — 성공 (JS 405KB, CSS 21KB)
+
+#### 아직 수행하지 않은 검증
+- [ ] Data-Plane: `mvn quarkus:dev` 후 `/routes/deploy`, `/health/routes` 엔드포인트 실제 호출 테스트
+- [ ] Frontend: `npm run dev` 후 브라우저에서 대시보드, Route 목록, 플로우 디자이너 UI 동작 확인
 - [ ] E2E: Route 생성 → 플로우 디자인 → 저장 → 배포 → 상태 확인 전체 흐름
 
 ### 기능 개선 (선택)

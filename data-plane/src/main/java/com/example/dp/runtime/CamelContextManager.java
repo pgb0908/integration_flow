@@ -6,6 +6,7 @@ import io.quarkus.runtime.StartupEvent;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
 import org.apache.camel.spi.Resource;
+import org.apache.camel.spi.RoutesLoader;
 import org.apache.camel.support.ResourceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,8 @@ public class CamelContextManager {
 
     public void addRouteFromYaml(String routeId, String yamlDsl) throws Exception {
         Resource resource = ResourceHelper.fromString("route-" + routeId + ".yaml", yamlDsl);
-        camelContext.getRoutesLoader().loadRoutes(resource);
+        RoutesLoader loader = camelContext.getCamelContextExtension().getContextPlugin(RoutesLoader.class);
+        loader.loadRoutes(resource);
         log.info("Added route '{}' to CamelContext", routeId);
     }
 
