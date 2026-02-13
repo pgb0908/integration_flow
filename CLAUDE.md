@@ -11,7 +11,7 @@ Control-Plane(설계/관리)과 Data-Plane(실행 엔진)으로 구성된 모노
 | data-plane | Camel Route 실행 엔진 | Camel Quarkus |
 | shared | 공통 DSL 모델, DTO | Java 17 |
 
-## architecture
+## Architecture
 ```mermaid
 graph TB
     subgraph CP["🧠 Control-Plane"]

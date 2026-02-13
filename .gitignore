@@ -1,0 +1,49 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (if used)
+.gradle/
+build/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.log
+hs_err_pid*
+
+# Node / Frontend
+control-plane/frontend/node_modules/
+control-plane/frontend/dist/
+control-plane/frontend/.env.local
+control-plane/frontend/.env.*.local
+
+# Quarkus
+.quarkus/
+
+# Spring Boot
+spring-boot-devtools.properties
+
+# Env / Secrets
+.env
+*.env
+credentials.json
