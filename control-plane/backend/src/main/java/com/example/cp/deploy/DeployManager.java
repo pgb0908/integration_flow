@@ -1,20 +1,33 @@
 package com.example.cp.deploy;
 
 import com.example.shared.api.RouteDeployRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-/**
- * Data-Plane으로 Route 설정을 전달하는 배포 관리자.
- */
 @Component
 public class DeployManager {
 
-    /**
-     * Data-Plane에 Route 배포 요청을 전송한다.
-     *
-     * @param request 배포 요청 DTO
-     */
+    private static final Logger log = LoggerFactory.getLogger(DeployManager.class);
+
+    private final RestTemplate restTemplate;
+    private final String dataPlaneUrl;
+
+    public DeployManager(@Value("${data-plane.url}") String dataPlaneUrl) {
+        this.restTemplate = new RestTemplate();
+        this.dataPlaneUrl = dataPlaneUrl;
+    }
+
     public void deploy(RouteDeployRequest request) {
-        // TODO: Data-Plane HTTP/gRPC 호출 구현
+        String url = dataPlaneUrl + "/routes/deploy";
+        try {
+            restTemplate.postForEntity(url, request, String.class);
+            log.info("Deployed {} routes to Data-Plane", request.getRoutes().size());
+        } catch (Exception e) {
+            log.error("Failed to deploy to Data-Plane: {}", e.getMessage());
+            throw new RuntimeException("Data-Plane deployment failed", e);
+        }
     }
 }
