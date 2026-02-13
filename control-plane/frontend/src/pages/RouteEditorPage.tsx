@@ -29,9 +29,11 @@ function RouteEditorPage() {
       routeApi.getById(id).then((res) => {
         setName(res.data.name || '')
         setDescription(res.data.description || '')
+      }).catch(() => {
+        navigate('/routes/new', { replace: true })
       })
     }
-  }, [id])
+  }, [id, navigate])
 
   const generateYaml = useCallback(() => {
     const generated = flowToYaml(nodes, edges)
@@ -51,7 +53,16 @@ function RouteEditorPage() {
         const res = await routeApi.create({ name, description, yamlDsl })
         navigate(`/routes/${res.data.id}/edit`, { replace: true })
       } else {
-        await routeApi.update(id, { name, description, yamlDsl })
+        try {
+          await routeApi.update(id!, { name, description, yamlDsl })
+        } catch (e: unknown) {
+          if (e && typeof e === 'object' && 'response' in e && (e as { response?: { status?: number } }).response?.status === 404) {
+            const res = await routeApi.create({ name, description, yamlDsl })
+            navigate(`/routes/${res.data.id}/edit`, { replace: true })
+          } else {
+            throw e
+          }
+        }
       }
       alert('Route saved!')
     } catch {

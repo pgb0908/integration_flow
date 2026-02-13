@@ -92,9 +92,35 @@
 - [ ] Frontend: `npm run dev` 후 브라우저에서 대시보드, Route 목록, 플로우 디자이너 UI 동작 확인
 - [ ] E2E: Route 생성 → 플로우 디자인 → 저장 → 배포 → 상태 확인 전체 흐름
 
-### 기능 개선 (선택)
+### 기능 개선 — 다음 작업 항목
+
+#### (우선) 노드 속성 편집 패널 (Properties Panel)
+현재 노드를 배치/연결만 가능하고, 속성(URI, 조건식 등)을 편집할 수 없다.
+- [ ] **파일**: `src/components/flow/PropertiesPanel.tsx` (신규)
+  - 노드 클릭 시 우측에 Properties Panel 표시
+  - 노드 타입별 편집 가능한 속성 필드:
+    | 노드 타입 | 속성 |
+    |-----------|------|
+    | Start | URI (예: `direct:start`, `timer:tick`) |
+    | Endpoint | URI (예: `kafka:topic`, `http://api.example.com`) |
+    | If/Else | 조건식 (예: `${header.type} == 'A'`) |
+    | Log | 로그 메시지 |
+    | Transform | 변환 표현식 (예: `${body.toUpperCase()}`) |
+    | End | URI (예: `mock:result`) |
+  - 속성 변경 시 노드의 `data`에 반영 (label 업데이트)
+- [ ] **파일**: `src/components/flow/FlowCanvas.tsx` (수정)
+  - 노드 클릭 이벤트(`onNodeClick`) 핸들링 → 선택된 노드 ID를 상위로 전달
+- [ ] **파일**: `src/components/flow/nodeTypes.tsx` (수정)
+  - 노드 data에 `uri`, `condition`, `message`, `expression` 등 속성 필드 추가
+- [ ] **파일**: `src/components/flow/flowToYaml.ts` (수정)
+  - 노드의 속성값을 YAML 생성 시 실제 값으로 반영 (현재는 하드코딩된 placeholder 사용)
+- [ ] **파일**: `src/pages/RouteEditorPage.tsx` (수정)
+  - 선택된 노드 상태 관리, PropertiesPanel 배치 (에디터 우측)
+- [ ] **파일**: `src/App.css` (수정)
+  - Properties Panel 스타일 추가
+
+#### 기타 개선
 - [ ] Route 편집 시 기존 YAML을 파싱하여 노드로 복원하는 기능 (YAML → Flow 역변환)
-- [ ] 노드 속성 편집 패널 (노드 클릭 시 URI, 조건식 등 입력)
 - [ ] Data-Plane 연결 상태를 Dashboard에 실시간 표시 (polling 또는 WebSocket)
 - [ ] 배포 이력 관리 (Deployments 페이지)
 - [ ] 에러 핸들링 개선 (toast 알림 등)
