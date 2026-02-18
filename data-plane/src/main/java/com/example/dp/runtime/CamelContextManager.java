@@ -1,49 +1,79 @@
 package com.example.dp.runtime;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import io.quarkus.runtime.StartupEvent;
+import jakarta.inject.Inject;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Route;
-import org.apache.camel.spi.Resource;
-import org.apache.camel.spi.RoutesLoader;
-import org.apache.camel.support.ResourceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+/**
+ * CamelContext 라이프사이클 관리
+ */
 @ApplicationScoped
 public class CamelContextManager {
+    private static final Logger logger = LoggerFactory.getLogger(CamelContextManager.class);
 
-    private static final Logger log = LoggerFactory.getLogger(CamelContextManager.class);
+    @Inject
+    CamelContext camelContext;
 
-    private final CamelContext camelContext;
-
-    public CamelContextManager(CamelContext camelContext) {
-        this.camelContext = camelContext;
+    /**
+     * CamelContext 상태 조회
+     */
+    public String getContextStatus() {
+        return camelContext.getStatus().name();
     }
 
-    void onStart(@Observes StartupEvent event) {
-        log.info("CamelContext '{}' started with {} routes",
-                camelContext.getName(), camelContext.getRoutes().size());
+    /**
+     * 실행 중인 모든 Route ID 조회
+     */
+    public List<String> getRunningRouteIds() {
+        return camelContext.getRoutes().stream()
+                .map(route -> route.getId())
+                .toList();
     }
 
-    public CamelContext getContext() {
-        return camelContext;
-    }
-
-    public void addRouteFromYaml(String routeId, String yamlDsl) throws Exception {
-        Resource resource = ResourceHelper.fromString("route-" + routeId + ".yaml", yamlDsl);
-        RoutesLoader loader = camelContext.getCamelContextExtension().getContextPlugin(RoutesLoader.class);
-        loader.loadRoutes(resource);
-        log.info("Added route '{}' to CamelContext", routeId);
-    }
-
-    public void removeRoute(String routeId) throws Exception {
-        Route route = camelContext.getRoute(routeId);
-        if (route != null) {
-            camelContext.getRouteController().stopRoute(routeId);
-            camelContext.removeRoute(routeId);
-            log.info("Removed route '{}' from CamelContext", routeId);
+    /**
+     * 특정 Route의 상태 조회
+     */
+    public String getRouteStatus(String routeId) {
+        var route = camelContext.getRoute(routeId);
+        if (route == null) {
+            logger.warn("Route not found: {}", routeId);
+            return "NOT_FOUND";
         }
+
+        var status = camelContext.getRouteController().getRouteStatus(routeId);
+        return status != null ? status.name() : "UNKNOWN";
     }
+
+    /**
+     * CamelContext 통계 조회
+     */
+    public ContextStats getContextStats() {
+        int totalRoutes = camelContext.getRoutes().size();
+        int startedRoutes = (int) camelContext.getRoutes().stream()
+                .filter(route -> camelContext.getRouteController()
+                        .getRouteStatus(route.getId()).isStarted())
+                .count();
+
+        return new ContextStats(
+                camelContext.getName(),
+                camelContext.getVersion(),
+                camelContext.getStatus().name(),
+                totalRoutes,
+                startedRoutes,
+                camelContext.getUptime()
+        );
+    }
+
+    public record ContextStats(
+            String name,
+            String version,
+            String status,
+            int totalRoutes,
+            int startedRoutes,
+            String uptime
+    ) {}
 }

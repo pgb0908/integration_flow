@@ -1,0 +1,13 @@
+# Sample HTTP Route
+- route:
+    id: sample-http-route
+    from:
+      uri: platform-http:/hello
+      steps:
+        - log:
+            message: "Received HTTP request: ${body}"
+        - set-body:
+            simple: "Hello ${body}! Time: ${date:now:yyyy-MM-dd HH:mm:ss}"
+        - set-header:
+            name: Content-Type
+            constant: text/plain

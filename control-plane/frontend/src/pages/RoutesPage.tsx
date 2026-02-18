@@ -1,100 +1,94 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { routeApi, type RouteDefinition } from '../api/client'
-import { Plus, Pencil, Trash2, Rocket } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function RoutesPage() {
-  const [routes, setRoutes] = useState<RouteDefinition[]>([])
-  const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+const COLORS = {
+  card: '#1e2035',
+  cardHover: '#252845',
+  border: '#2a2d45',
+  accent: '#50e3c2',
+  accentRed: '#ff6b6b',
+  text: '#e8eaf0',
+  textMuted: '#8890a8',
+  textDim: '#555a72',
+};
 
-  const fetchRoutes = () => {
-    setLoading(true)
-    routeApi.getAll().then((res) => {
-      setRoutes(res.data)
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }
+interface Route {
+  id?: number;
+  name: string;
+  status?: string;
+  projectId?: number;
+  description?: string;
+}
 
-  useEffect(() => { fetchRoutes() }, [])
+interface RoutesPageProps {
+  projectId?: number;
+  onEditRoute: (routeId: number) => void;
+}
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this route?')) return
-    await routeApi.delete(id)
-    fetchRoutes()
-  }
+export default function RoutesPage({ projectId, onEditRoute }: RoutesPageProps) {
+  const [routes, setRoutes] = useState<Route[]>([]);
 
-  const handleDeploy = async (id: string) => {
-    try {
-      await routeApi.deploy(id)
-      alert('Route deployed successfully!')
-      fetchRoutes()
-    } catch {
-      alert('Deployment failed. Is Data-Plane running?')
-    }
-  }
+  useEffect(() => {
+    // Note: /api/projects/${projectId}/routes would be ideal but may not exist yet
+    // For now, fetch all routes and filter client-side
+    axios.get('/api/routes')
+      .then(response => {
+        if (response.data.success) {
+          const allRoutes = response.data.data;
+          // Filter by projectId if provided
+          const filteredRoutes = projectId
+            ? allRoutes.filter((r: Route) => r.projectId === projectId)
+            : allRoutes;
+          setRoutes(filteredRoutes);
+        }
+      })
+      .catch(error => console.error('Failed to load routes:', error));
+  }, [projectId]);
 
   return (
-    <div className="page-container">
-      <div className="section-header">
-        <h1 className="page-title">Routes</h1>
-        <button className="btn btn-primary" onClick={() => navigate('/routes/new')}>
-          <Plus size={16} /> New Route
-        </button>
-      </div>
-
-      {loading ? (
-        <p className="text-muted">Loading...</p>
-      ) : routes.length === 0 ? (
-        <div className="empty-state">
-          <p>No routes yet. Create your first integration route!</p>
-          <button className="btn btn-primary" onClick={() => navigate('/routes/new')}>
-            <Plus size={16} /> Create Route
-          </button>
-        </div>
-      ) : (
-        <table className="data-table">
+    <div style={{ padding: 28 }}>
+      <div style={{ background: COLORS.card, borderRadius: 10, border: `1px solid ${COLORS.border}`, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Actions</th>
+            <tr style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+              {['Route Name', 'Status', 'Description', 'Actions'].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    textAlign: 'left',
+                    padding: '12px 16px',
+                    color: COLORS.textDim,
+                    fontWeight: 500,
+                    fontSize: 11,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {routes.map((route) => (
-              <tr key={route.id}>
-                <td className="font-medium">{route.name}</td>
-                <td>{route.description || '-'}</td>
-                <td>
-                  <span className={`badge ${route.yamlDsl ? 'badge-success' : 'badge-warning'}`}>
-                    {route.yamlDsl ? 'Ready' : 'Draft'}
+            {routes.map((r) => (
+              <tr
+                key={r.id}
+                style={{ borderBottom: `1px solid ${COLORS.border}`, cursor: 'pointer' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.cardHover)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <td style={{ padding: '12px 16px', color: COLORS.text, fontWeight: 500 }}>{r.name}</td>
+                <td style={{ padding: '12px 16px' }}>
+                  <span style={{ color: r.status === 'running' ? COLORS.accent : COLORS.textDim }}>
+                    {r.status || 'stopped'}
                   </span>
                 </td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className="btn btn-sm btn-icon"
-                      title="Edit"
-                      onClick={() => navigate(`/routes/${route.id}/edit`)}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-icon btn-deploy"
-                      title="Deploy"
-                      onClick={() => handleDeploy(route.id)}
-                      disabled={!route.yamlDsl}
-                    >
-                      <Rocket size={14} />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-icon btn-danger"
-                      title="Delete"
-                      onClick={() => handleDelete(route.id)}
-                    >
-                      <Trash2 size={14} />
+                <td style={{ padding: '12px 16px', color: COLORS.textMuted }}>{r.description || '-'}</td>
+                <td style={{ padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button onClick={() => onEditRoute(r.id!)} style={{ padding: '4px 12px', fontSize: 11 }}>✏️ Edit</button>
+                    <button style={{ padding: '4px 12px', fontSize: 11 }}>
+                      {r.status === 'running' ? '⏹ Stop' : '▶️ Start'}
                     </button>
                   </div>
                 </td>
@@ -102,9 +96,7 @@ function RoutesPage() {
             ))}
           </tbody>
         </table>
-      )}
+      </div>
     </div>
-  )
+  );
 }
-
-export default RoutesPage

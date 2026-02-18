@@ -11,10 +11,13 @@
     </parent>
 
     <artifactId>shared</artifactId>
-    <name>Shared Module</name>
-    <description>공통 DSL 모델 및 API DTO (순수 Java, 프레임워크 의존성 없음)</description>
+    <packaging>jar</packaging>
+
+    <name>Shared</name>
+    <description>공유 DSL 모델 및 DTO (순수 Java)</description>
 
     <dependencies>
+        <!-- Jackson for JSON serialization -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>

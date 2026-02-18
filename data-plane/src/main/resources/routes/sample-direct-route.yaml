@@ -1,0 +1,22 @@
+# Sample Direct Route (for testing)
+- route:
+    id: sample-direct-producer
+    from:
+      uri: timer:producer?period=15000
+      steps:
+        - set-body:
+            simple: "Message at ${date:now:HH:mm:ss}"
+        - to:
+            uri: direct:process
+
+- route:
+    id: sample-direct-consumer
+    from:
+      uri: direct:process
+      steps:
+        - log:
+            message: "Processing: ${body}"
+        - transform:
+            simple: "Processed: ${body}"
+        - to:
+            uri: log:result

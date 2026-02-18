@@ -1,0 +1,12 @@
+# Sample Timer Route
+- route:
+    id: sample-timer-route
+    from:
+      uri: timer:hello?period=10000
+      steps:
+        - log:
+            message: "Timer triggered at ${date:now:yyyy-MM-dd HH:mm:ss}"
+        - set-body:
+            constant: "Hello from Data-Plane!"
+        - to:
+            uri: log:output?showHeaders=true

@@ -1,38 +1,43 @@
 package com.example.shared.api;
 
-import com.example.shared.dsl.RouteDefinition;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.List;
-
-/**
- * Control-Plane → Data-Plane 배포 요청 DTO.
- */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouteDeployRequest {
-
-    private String deploymentId;
-    private List<RouteDefinition> routes;
+    private String routeId;
+    private String yamlDsl;
+    private String targetDataPlane;
 
     public RouteDeployRequest() {
     }
 
-    public RouteDeployRequest(String deploymentId, List<RouteDefinition> routes) {
-        this.deploymentId = deploymentId;
-        this.routes = routes;
+    public RouteDeployRequest(String routeId, String yamlDsl, String targetDataPlane) {
+        this.routeId = routeId;
+        this.yamlDsl = yamlDsl;
+        this.targetDataPlane = targetDataPlane;
     }
 
-    public String getDeploymentId() {
-        return deploymentId;
+    public String getRouteId() {
+        return routeId;
     }
 
-    public void setDeploymentId(String deploymentId) {
-        this.deploymentId = deploymentId;
+    public void setRouteId(String routeId) {
+        this.routeId = routeId;
     }
 
-    public List<RouteDefinition> getRoutes() {
-        return routes;
+    public String getYamlDsl() {
+        return yamlDsl;
     }
 
-    public void setRoutes(List<RouteDefinition> routes) {
-        this.routes = routes;
+    public void setYamlDsl(String yamlDsl) {
+        this.yamlDsl = yamlDsl;
+    }
+
+    public String getTargetDataPlane() {
+        return targetDataPlane;
+    }
+
+    public void setTargetDataPlane(String targetDataPlane) {
+        this.targetDataPlane = targetDataPlane;
     }
 }

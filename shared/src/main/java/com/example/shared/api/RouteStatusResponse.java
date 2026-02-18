@@ -1,25 +1,20 @@
 package com.example.shared.api;
 
-/**
- * Data-Plane → Control-Plane 상태 보고 DTO.
- */
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouteStatusResponse {
-
-    public enum Status {
-        RUNNING, STOPPED, ERROR
-    }
-
     private String routeId;
-    private Status status;
+    private String status;
     private String message;
+    private Long throughput;
 
     public RouteStatusResponse() {
     }
 
-    public RouteStatusResponse(String routeId, Status status, String message) {
+    public RouteStatusResponse(String routeId, String status) {
         this.routeId = routeId;
         this.status = status;
-        this.message = message;
     }
 
     public String getRouteId() {
@@ -30,11 +25,11 @@ public class RouteStatusResponse {
         this.routeId = routeId;
     }
 
-    public Status getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
@@ -44,5 +39,13 @@ public class RouteStatusResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Long getThroughput() {
+        return throughput;
+    }
+
+    public void setThroughput(Long throughput) {
+        this.throughput = throughput;
     }
 }

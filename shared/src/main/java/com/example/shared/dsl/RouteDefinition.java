@@ -1,26 +1,27 @@
 package com.example.shared.dsl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 
-/**
- * Camel Route를 표현하는 DSL 모델.
- * YAML DSL을 Java 객체로 매핑할 때 사용.
- */
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouteDefinition {
-
     private String id;
     private String name;
     private String description;
+    private List<NodeDefinition> nodes;
+    private List<EdgeDefinition> edges;
     private String yamlDsl;
 
     public RouteDefinition() {
     }
 
-    public RouteDefinition(String id, String name, String yamlDsl) {
+    public RouteDefinition(String id, String name, String description,
+                          List<NodeDefinition> nodes, List<EdgeDefinition> edges) {
         this.id = id;
         this.name = name;
-        this.yamlDsl = yamlDsl;
+        this.description = description;
+        this.nodes = nodes;
+        this.edges = edges;
     }
 
     public String getId() {
@@ -45,6 +46,22 @@ public class RouteDefinition {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<NodeDefinition> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(List<NodeDefinition> nodes) {
+        this.nodes = nodes;
+    }
+
+    public List<EdgeDefinition> getEdges() {
+        return edges;
+    }
+
+    public void setEdges(List<EdgeDefinition> edges) {
+        this.edges = edges;
     }
 
     public String getYamlDsl() {
