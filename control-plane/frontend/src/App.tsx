@@ -21,28 +21,54 @@ const COLORS = {
 
 type PageType = 'projects' | 'routes' | 'designer' | 'deployments' | 'kamelets' | 'settings';
 
-interface PageConfig {
-  title: string;
-  subtitle: string;
-  actions?: React.ReactNode;
-}
-
 export default function App() {
   const [page, setPage] = useState<PageType>('projects');
   const [sidebarCollapsed] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
-  const pageConfig: Record<PageType, PageConfig> = {
-    projects: { title: 'Projects', subtitle: 'All projects', actions: <button className="btn-primary">+ New Project</button> },
-    routes: { title: 'Routes', subtitle: 'All integration routes', actions: <button className="btn-primary">+ New Route</button> },
-    designer: { title: 'Route Designer', subtitle: 'Design your route', actions: <><button>💾 Save</button><button className="btn-primary">🚀 Deploy</button></> },
-    deployments: { title: 'Deployments', subtitle: 'Recent deployments' },
-    kamelets: { title: 'Kamelet Catalog', subtitle: 'Custom adapters', actions: <button className="btn-primary">+ Register</button> },
-    settings: { title: 'Settings', subtitle: 'Platform configuration', actions: <button className="btn-primary">+ Add Data-Plane</button> },
+  // Trigger counters: incrementing causes the page to open its create modal
+  const [newProjectTrigger, setNewProjectTrigger] = useState(0);
+  const [newRouteTrigger, setNewRouteTrigger] = useState(0);
+
+  const getActions = () => {
+    switch (page) {
+      case 'projects':
+        return (
+          <button className="btn-primary" onClick={() => setNewProjectTrigger((n) => n + 1)}>
+            + New Project
+          </button>
+        );
+      case 'routes':
+        return (
+          <button className="btn-primary" onClick={() => setNewRouteTrigger((n) => n + 1)}>
+            + New Route
+          </button>
+        );
+      case 'designer':
+        return (
+          <>
+            <button>💾 Save</button>
+            <button className="btn-primary">🚀 Deploy</button>
+          </>
+        );
+      case 'kamelets':
+        return <button className="btn-primary">+ Register</button>;
+      case 'settings':
+        return <button className="btn-primary">+ Add Data-Plane</button>;
+      default:
+        return null;
+    }
   };
 
-  const cfg = pageConfig[page];
+  const pageTitles: Record<PageType, { title: string; subtitle: string }> = {
+    projects: { title: 'Projects', subtitle: 'All projects' },
+    routes: { title: 'Routes', subtitle: 'All integration routes' },
+    designer: { title: 'Route Designer', subtitle: 'Design your route' },
+    deployments: { title: 'Deployments', subtitle: 'Recent deployments' },
+    kamelets: { title: 'Kamelet Catalog', subtitle: 'Custom adapters' },
+    settings: { title: 'Settings', subtitle: 'Platform configuration' },
+  };
 
   const handleProjectClick = (projectId: number) => {
     setSelectedProjectId(projectId);
@@ -56,15 +82,35 @@ export default function App() {
 
   const renderPage = () => {
     switch (page) {
-      case 'projects': return <ProjectsPage onProjectClick={handleProjectClick} />;
-      case 'routes': return <RoutesPage projectId={selectedProjectId ?? undefined} onEditRoute={handleEditRoute} />;
-      case 'designer': return <DesignerPage routeId={selectedRouteId ?? undefined} />;
-      case 'deployments': return <DeploymentsPage />;
-      case 'kamelets': return <KameletsPage />;
-      case 'settings': return <SettingsPage />;
-      default: return <ProjectsPage onProjectClick={handleProjectClick} />;
+      case 'projects':
+        return (
+          <ProjectsPage
+            onProjectClick={handleProjectClick}
+            createTrigger={newProjectTrigger}
+          />
+        );
+      case 'routes':
+        return (
+          <RoutesPage
+            projectId={selectedProjectId ?? undefined}
+            onEditRoute={handleEditRoute}
+            createTrigger={newRouteTrigger}
+          />
+        );
+      case 'designer':
+        return <DesignerPage routeId={selectedRouteId ?? undefined} />;
+      case 'deployments':
+        return <DeploymentsPage />;
+      case 'kamelets':
+        return <KameletsPage />;
+      case 'settings':
+        return <SettingsPage />;
+      default:
+        return <ProjectsPage onProjectClick={handleProjectClick} createTrigger={newProjectTrigger} />;
     }
   };
+
+  const cfg = pageTitles[page];
 
   return (
     <div style={{
@@ -78,11 +124,11 @@ export default function App() {
     }}>
       <Sidebar
         active={page}
-        onNav={setPage}
+        onNav={(p) => setPage(p as PageType)}
         collapsed={sidebarCollapsed}
       />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Header title={cfg.title} subtitle={cfg.subtitle} actions={cfg.actions} />
+        <Header title={cfg.title} subtitle={cfg.subtitle} actions={getActions()} />
         <div style={{ flex: 1, overflow: 'auto', display: page === 'designer' ? 'flex' : 'block' }}>
           {renderPage()}
         </div>

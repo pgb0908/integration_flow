@@ -40,6 +40,19 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(DataPlaneException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataPlaneException(
+            DataPlaneException ex, WebRequest request) {
+        logger.error("Data-Plane communication error: routeId={}, httpStatus={}, message={}",
+                ex.getRouteId(), ex.getHttpStatus(), ex.getMessage());
+        String message = ex.isConnectionFailure()
+                ? "Data-Plane is currently unavailable. Config saved, retry later."
+                : "Data-Plane rejected: HTTP " + ex.getHttpStatus();
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(ApiResponse.error(message));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGlobalException(
             Exception ex, WebRequest request) {

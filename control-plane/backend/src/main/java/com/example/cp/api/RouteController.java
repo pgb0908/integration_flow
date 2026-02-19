@@ -39,11 +39,7 @@ public class RouteController {
 
     @PutMapping("/{id}")
     public ApiResponse<RouteEntity> updateRoute(@PathVariable Long id, @RequestBody RouteEntity route) {
-        try {
-            return ApiResponse.success(routeService.updateRoute(id, route), "Route updated successfully");
-        } catch (RuntimeException e) {
-            return ApiResponse.error(e.getMessage());
-        }
+        return ApiResponse.success(routeService.updateRoute(id, route), "Route updated successfully");
     }
 
     @DeleteMapping("/{id}")
@@ -53,24 +49,17 @@ public class RouteController {
     }
 
     @PostMapping("/{id}/deploy")
-    public ApiResponse<String> deployRoute(@PathVariable Long id) {
-        return routeService.getRouteById(id)
-                .map(route -> {
-                    // TODO: Implement Data-Plane deployment
-                    return ApiResponse.success("Deployment initiated", "Route deployment started");
-                })
-                .orElse(ApiResponse.error("Route not found"));
+    public ApiResponse<RouteEntity> deployRoute(@PathVariable Long id) {
+        return ApiResponse.success(routeService.deployRoute(id), "Route deployed successfully");
     }
 
     @PostMapping("/{id}/start")
-    public ApiResponse<String> startRoute(@PathVariable Long id) {
-        routeService.updateRouteStatus(id, "running");
-        return ApiResponse.success("started", "Route started successfully");
+    public ApiResponse<RouteEntity> startRoute(@PathVariable Long id) {
+        return ApiResponse.success(routeService.startRoute(id), "Route started successfully");
     }
 
     @PostMapping("/{id}/stop")
-    public ApiResponse<String> stopRoute(@PathVariable Long id) {
-        routeService.updateRouteStatus(id, "stopped");
-        return ApiResponse.success("stopped", "Route stopped successfully");
+    public ApiResponse<RouteEntity> stopRoute(@PathVariable Long id) {
+        return ApiResponse.success(routeService.stopRoute(id), "Route stopped successfully");
     }
 }

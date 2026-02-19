@@ -3,6 +3,7 @@ package com.example.dp.runtime;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.camel.CamelContext;
+import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RouteDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class RouteManager {
     public void addRoute(RouteDefinition routeDefinition) throws Exception {
         logger.info("Adding route: {}", routeDefinition.getId());
 
-        camelContext.addRouteDefinition(routeDefinition);
+        ((ModelCamelContext) camelContext).addRouteDefinitions(List.of(routeDefinition));
         camelContext.getRouteController().startRoute(routeDefinition.getId());
 
         logger.info("Route added and started: {}", routeDefinition.getId());
@@ -37,9 +38,7 @@ public class RouteManager {
     public void addRoutes(List<RouteDefinition> routeDefinitions) throws Exception {
         logger.info("Adding {} routes", routeDefinitions.size());
 
-        for (RouteDefinition routeDef : routeDefinitions) {
-            camelContext.addRouteDefinition(routeDef);
-        }
+        ((ModelCamelContext) camelContext).addRouteDefinitions(routeDefinitions);
 
         // Start all routes
         for (RouteDefinition routeDef : routeDefinitions) {

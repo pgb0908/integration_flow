@@ -34,7 +34,7 @@ public class RouteHealthCheck implements HealthCheck {
             builder.withData("totalRoutes", totalRoutes);
             builder.withData("startedRoutes", startedRoutes);
             builder.withData("contextStatus", camelContext.getStatus().name());
-            builder.withData("contextUptime", camelContext.getUptime());
+            builder.withData("contextUptime", camelContext.getUptime().toString());
 
             // Health is UP if context is started
             if (camelContext.getStatus().isStarted()) {

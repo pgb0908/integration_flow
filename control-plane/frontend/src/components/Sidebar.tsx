@@ -1,5 +1,3 @@
-import React from 'react';
-
 const COLORS = {
   sidebar: '#161821',
   sidebarHover: '#1e2030',

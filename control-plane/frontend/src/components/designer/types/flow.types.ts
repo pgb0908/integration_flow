@@ -12,11 +12,11 @@ export interface ComponentCategory {
 }
 
 // Camel Component Metadata
-export interface CamelComponentData {
+export interface CamelComponentData extends Record<string, unknown> {
   componentName: string;  // e.g., 'http', 'kafka', 'direct'
   type: ComponentType;
   uri?: string;           // e.g., 'http://localhost:8080/api'
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   label?: string;
   icon?: string;
 
@@ -37,7 +37,7 @@ export interface CamelComponentData {
 export type CamelNode = Node<CamelComponentData>;
 
 // Custom Edge Data
-export interface CamelEdgeData {
+export interface CamelEdgeData extends Record<string, unknown> {
   animated?: boolean;
   label?: string;
 }

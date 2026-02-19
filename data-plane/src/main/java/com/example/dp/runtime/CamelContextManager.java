@@ -64,7 +64,7 @@ public class CamelContextManager {
                 camelContext.getStatus().name(),
                 totalRoutes,
                 startedRoutes,
-                camelContext.getUptime()
+                camelContext.getUptime().toString()
         );
     }
 

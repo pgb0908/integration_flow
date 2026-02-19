@@ -4,14 +4,12 @@ import com.example.dp.runtime.RouteManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.spi.Resource;
+import org.apache.camel.spi.RoutesLoader;
+import org.apache.camel.support.ResourceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -35,20 +33,12 @@ public class YamlRouteLoader {
         logger.debug("YAML content:\n{}", yamlContent);
 
         try {
-            // Parse YAML to RouteDefinition
-            var inputStream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            var routes = camelContext.loadRoutesDefinition(inputStream);
+            Resource resource = ResourceHelper.fromString("inline.yaml", yamlContent);
+            RoutesLoader loader = camelContext.getCamelContextExtension()
+                    .getContextPlugin(RoutesLoader.class);
+            loader.loadRoutes(resource);
 
-            if (routes != null && !routes.getRoutes().isEmpty()) {
-                logger.info("Parsed {} route(s) from YAML", routes.getRoutes().size());
-
-                // Add routes to context
-                routeManager.addRoutes(routes.getRoutes());
-
-                logger.info("Successfully loaded {} route(s)", routes.getRoutes().size());
-            } else {
-                logger.warn("No routes found in YAML");
-            }
+            logger.info("Successfully loaded routes from YAML");
         } catch (Exception e) {
             logger.error("Failed to load routes from YAML", e);
             throw new RuntimeException("Failed to load routes: " + e.getMessage(), e);

@@ -1,5 +1,5 @@
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { CamelComponentData } from '../types/flow.types';
+import { CamelNode } from '../types/flow.types';
 
 const COLORS = {
   card: '#1e2035',
@@ -8,7 +8,7 @@ const COLORS = {
   nodeSource: '#50e3c2',
 };
 
-export default function SourceNode({ data, selected }: NodeProps<CamelComponentData>) {
+export default function SourceNode({ data, selected }: NodeProps<CamelNode>) {
   return (
     <div
       style={{
